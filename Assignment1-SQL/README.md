@@ -1,5 +1,5 @@
 # Assignment 1 - SQL
-[Assignment 1 - SQL](https://15445.courses.cs.cmu.edu/fall2020/homework1/)
+[HOMEWORK #1 - SQL](https://15445.courses.cs.cmu.edu/fall2020/homework1/)
 
 Go to the release page and download **musicbrainz-cmudb2020.db.gz** file.  
 Unzip it and you can execute sql query in that database by:  
