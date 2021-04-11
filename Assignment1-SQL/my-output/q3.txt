@@ -1,0 +1,10 @@
+Germany|1543
+France|1169
+Italy|1049
+United Kingdom|766
+Austria|355
+United States|344
+Spain|270
+Russia|191
+England|181
+Czech Republic|156
