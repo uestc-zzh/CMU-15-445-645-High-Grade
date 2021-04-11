@@ -9,7 +9,7 @@ Unzip it and you can execute sql query in that database by:
 | File/Folder                           | Description                           |
 | :------------------------------------ | :------------------------------------ |
 | my-output                             | Output produced by my solutions       |
-| placeholder                           | My solutions                          |
+| my-solution                           | My solutions                          |
 | solution                              | Official solutions                    |
 | solution-output                       | Output produced by official solutions |
 | README.md                             | The file you are reading now          |
