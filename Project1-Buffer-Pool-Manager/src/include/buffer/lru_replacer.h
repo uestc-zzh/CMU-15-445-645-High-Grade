@@ -22,6 +22,12 @@
 
 namespace bustub {
 
+struct Node {
+  frame_id_t val;
+  Node *prev;
+  Node *next;
+};
+
 /**
  * LRUReplacer implements the lru replacement policy, which approximates the Least Recently Used policy.
  */
@@ -48,13 +54,23 @@ class LRUReplacer : public Replacer {
 
  private:
   // TODO(student): implement me!
-  size_t num_pages_;
-  std::unordered_map<frame_id_t, std::list<frame_id_t>::iterator> hash_;
-  std::list<frame_id_t> list_;
+
+  size_t node_buf_top_;
+  std::vector<Node> node_buf_;
+  std::vector<Node *> node_ptrs_;
+
+  Node *head;
+  Node *rear;
+
+  std::vector<Node *> hash_;
 
   std::mutex mutex_;
 
-  void pop();
+  void list_pop_back();
+
+  void list_erase(Node *p);
+
+  void list_push_front(frame_id_t frame_id);
 };
 
 }  // namespace bustub

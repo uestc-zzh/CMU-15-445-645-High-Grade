@@ -152,8 +152,6 @@ class BufferPoolManager {
    */
   void FlushAllPagesImpl();
 
-  frame_id_t GetFrameFromFreeList();
-
   static constexpr const frame_id_t INVALID_FRAME_ID = -1;
 
   /** Number of pages in the buffer pool. */

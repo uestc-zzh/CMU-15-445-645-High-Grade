@@ -15,54 +15,103 @@
 
 namespace bustub {
 
-LRUReplacer::LRUReplacer(size_t num_pages) : num_pages_(num_pages) {}
+LRUReplacer::LRUReplacer(size_t num_pages) {
+  this->node_buf_top_ = 0;
+  this->node_buf_ = std::vector<Node>(num_pages);
+  this->node_ptrs_ = std::vector<Node *>(num_pages);
+
+  for (size_t i = 0; i < node_ptrs_.size(); ++i) {
+    node_ptrs_[i] = &node_buf_[i];
+  }
+
+  this->head = nullptr;
+  this->rear = nullptr;
+
+  this->hash_ = std::vector<Node *>(num_pages);
+}
 
 LRUReplacer::~LRUReplacer() = default;
 
 bool LRUReplacer::Victim(frame_id_t *frame_id) {
   std::lock_guard lg(this->mutex_);
-  if (this->hash_.empty()) {
+
+  if (this->head == nullptr) {
     return false;
   }
-  std::swap(*frame_id, this->list_.back());
-  this->list_.pop_back();
-  this->hash_.erase(*frame_id);
+
+  *frame_id = this->rear->val;
+  this->list_pop_back();
+  this->hash_[*frame_id] = nullptr;
   return true;
 }
 
 void LRUReplacer::Pin(frame_id_t frame_id) {
   std::lock_guard lg(this->mutex_);
-  if (this->hash_.count(frame_id) > 0) {
-    this->list_.erase(this->hash_[frame_id]);
-    this->hash_.erase(frame_id);
+
+  if (this->hash_[frame_id] != nullptr) {
+    this->list_erase(this->hash_[frame_id]);
+    this->hash_[frame_id] = nullptr;
   }
 }
 
 void LRUReplacer::Unpin(frame_id_t frame_id) {
   std::lock_guard lg(this->mutex_);
-  if (this->hash_.count(frame_id) > 0) {
+
+  if (this->hash_[frame_id] != nullptr) {
     return;
   }
 
-  if (this->hash_.size() == this->num_pages_) {
-    this->pop();
-  }
-
-  this->list_.emplace_front(frame_id);
-  this->hash_[frame_id] = this->list_.begin();
+  this->list_push_front(frame_id);
+  this->hash_[frame_id] = this->head;
 }
 
 size_t LRUReplacer::Size() {
   std::lock_guard lg(this->mutex_);
-  return this->hash_.size();
+  return this->node_buf_top_;
 }
 
-void LRUReplacer::pop() {
-  std::lock_guard lg(this->mutex_);
-  if (this->hash_.empty()) {
-    return;
+void LRUReplacer::list_pop_back() {
+  this->node_ptrs_[--this->node_buf_top_] = this->rear;
+  if (this->rear == this->head) {
+    this->rear = nullptr;
+    this->head = nullptr;
+  } else {
+    this->rear = this->rear->prev;
+    this->rear->next = nullptr;
   }
-  this->hash_.erase(this->list_.back());
-  this->list_.pop_back();
 }
+
+void LRUReplacer::list_erase(Node *p) {
+  this->node_ptrs_[--this->node_buf_top_] = p;
+  if (p == this->head && p == this->rear) {
+    this->head = nullptr;
+    this->rear = nullptr;
+  } else if (p == this->head) {
+    this->head = this->head->next;
+    this->head->prev = nullptr;
+  } else if (p == this->rear) {
+    this->rear = this->rear->prev;
+    this->rear->next = nullptr;
+  } else {
+    p->prev->next = p->next;
+    p->next->prev = p->prev;
+  }
+}
+
+void LRUReplacer::list_push_front(frame_id_t frame_id) {
+  Node *p = this->node_ptrs_[this->node_buf_top_++];
+  p->val = frame_id;
+  if (this->head != nullptr) {
+    p->prev = nullptr;
+    p->next = this->head;
+    this->head->prev = p;
+    this->head = p;
+  } else {
+    this->head = p;
+    this->rear = p;
+    p->prev = nullptr;
+    p->next = nullptr;
+  }
+}
+
 }  // namespace bustub
