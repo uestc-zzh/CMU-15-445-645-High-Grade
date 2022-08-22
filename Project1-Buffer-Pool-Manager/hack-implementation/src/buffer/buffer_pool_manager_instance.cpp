@@ -28,7 +28,8 @@ BufferPoolManagerInstance::BufferPoolManagerInstance(size_t pool_size, uint32_t 
       next_page_id_(instance_index),
       disk_manager_(disk_manager),
       log_manager_(log_manager),
-      page_table_(10010, INVALID_FRAME_ID) {
+      page_table_(10010, INVALID_FRAME_ID),
+      free_list_(pool_size) {
   BUSTUB_ASSERT(num_instances > 0, "If BPI is not part of a pool, then the pool size should just be 1");
   BUSTUB_ASSERT(
       instance_index < num_instances,
@@ -39,7 +40,7 @@ BufferPoolManagerInstance::BufferPoolManagerInstance(size_t pool_size, uint32_t 
 
   // Initially, every page is in the free list.
   for (size_t i = 0; i < pool_size_; ++i) {
-    free_list_.emplace_back(static_cast<int>(i));
+    free_list_[i] = static_cast<int>(i);
   }
 }
 
@@ -91,8 +92,8 @@ auto BufferPoolManagerInstance::NewPgImp(page_id_t *page_id) -> Page * {
   Page *page_ptr;
 
   if (!this->free_list_.empty()) {
-    frame_id = this->free_list_.front();
-    this->free_list_.pop_front();
+    frame_id = this->free_list_.back();
+    this->free_list_.pop_back();
     page_ptr = &this->pages_[frame_id];
   } else {
     this->replacer_->Victim(&frame_id);
@@ -150,8 +151,8 @@ auto BufferPoolManagerInstance::FetchPgImp(page_id_t page_id) -> Page * {
   Page *page_ptr;
 
   if (!this->free_list_.empty()) {
-    frame_id = this->free_list_.front();
-    this->free_list_.pop_front();
+    frame_id = this->free_list_.back();
+    this->free_list_.pop_back();
     page_ptr = &this->pages_[frame_id];
   } else {
     this->replacer_->Victim(&frame_id);

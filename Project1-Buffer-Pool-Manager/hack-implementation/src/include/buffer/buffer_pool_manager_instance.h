@@ -148,8 +148,12 @@ class BufferPoolManagerInstance : public BufferPoolManager {
   std::vector<frame_id_t> page_table_;
   /** Replacer to find unpinned pages for replacement. */
   Replacer *replacer_;
+  /*
+   * [HACK]
+   * Change type from std::list to std::list to gain better performance.
+   */
   /** List of free pages. */
-  std::list<frame_id_t> free_list_;
+  std::vector<frame_id_t> free_list_;
   /** This latch protects shared data structures. We recommend updating this comment to describe what it protects. */
   std::mutex latch_;
 
